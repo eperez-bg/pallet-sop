@@ -6,6 +6,56 @@ const PAGE_HEIGHT = 792;
 const MARGIN = 50;
 const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;
 
+const crateTypeImages = {
+  "Fully Crated": {
+    fileName: "fully-crated.png",
+    type: "png",
+    label: "Fully Crated",
+  },
+  "Open Style Crate": {
+    fileName: "open-crate.jpg",
+    type: "jpg",
+    label: "Open Style Crate",
+  },
+  "Pallet Only": {
+    fileName: "pallet-only.jpg",
+    type: "jpg",
+    label: "Pallet Only",
+  },
+};
+
+async function getCrateTypeImage(pdfDoc, crateType) {
+  const imageInfo = crateTypeImages[crateType];
+
+  if (!imageInfo) {
+    return null;
+  }
+
+  try {
+    const imageUrl = `${import.meta.env.BASE_URL}${imageInfo.fileName}`;
+    const response = await fetch(imageUrl);
+
+    if (!response.ok) {
+      throw new Error(`Could not load image: ${imageInfo.fileName}`);
+    }
+
+    const imageBytes = await response.arrayBuffer();
+
+    const image =
+      imageInfo.type === "png"
+        ? await pdfDoc.embedPng(imageBytes)
+        : await pdfDoc.embedJpg(imageBytes);
+
+    return {
+      image,
+      label: imageInfo.label,
+    };
+  } catch (error) {
+    console.error("Failed to load crate type image:", error);
+    return null;
+  }
+}
+
 const constructionLabels = {
   nails: "Nails",
   screws: "Screws",
@@ -211,6 +261,57 @@ export async function downloadPalletSpecPdf(spec) {
     });
   }
 
+  async function drawCrateTypeImage() {
+  const crateImageData = await getCrateTypeImage(pdfDoc, spec.crateType);
+
+  if (!crateImageData) {
+    return;
+  }
+
+  const { image, label } = crateImageData;
+
+  const maxImageWidth = 220;
+  const maxImageHeight = 150;
+
+  const scaled = image.scale(1);
+
+  const widthRatio = maxImageWidth / scaled.width;
+  const heightRatio = maxImageHeight / scaled.height;
+  const scaleFactor = Math.min(widthRatio, heightRatio);
+
+  const imageWidth = scaled.width * scaleFactor;
+  const imageHeight = scaled.height * scaleFactor;
+
+  ensureSpace(imageHeight + 50);
+
+  page.drawText("Selected Crate Type", {
+    x: MARGIN,
+    y,
+    size: 14,
+    font: boldFont,
+    color: rgb(0, 0, 0),
+  });
+
+  y -= 22;
+
+  page.drawImage(image, {
+    x: MARGIN,
+    y: y - imageHeight,
+    width: imageWidth,
+    height: imageHeight,
+  });
+
+  page.drawText(label, {
+    x: MARGIN + imageWidth + 24,
+    y: y - 24,
+    size: 18,
+    font: boldFont,
+    color: rgb(0, 0, 0),
+  });
+
+  y -= imageHeight + 24;
+}
+
   function drawWarningBox(text) {
     const boxHeight = 52;
 
@@ -275,6 +376,8 @@ export async function downloadPalletSpecPdf(spec) {
     color: rgb(0.35, 0.35, 0.35),
     lineHeight: 18,
   });
+
+  await drawCrateTypeImage();
 
   // Client / Project
   drawSectionTitle("Client / Project");
