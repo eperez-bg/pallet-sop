@@ -160,6 +160,18 @@ button {
   gap: 10px;
 }
 
+.pm-warning {
+  margin: 28px 0 16px;
+  padding: 18px;
+  border: 2px solid #222;
+  border-radius: 10px;
+  background: #f8f8f8;
+  font-size: 20px;
+  font-weight: 800;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 .export-button {
   width: 100%;
   font-size: 16px;

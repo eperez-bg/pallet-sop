@@ -216,17 +216,9 @@ function App() {
           </div>
         </section>
 
-        <section className="form-section">
-          <label htmlFor="specialInstructions">Special Instructions</label>
-          <textarea
-            id="specialInstructions"
-            value={spec.specialInstructions}
-            onChange={(event) =>
-              updateField("specialInstructions", event.target.value)
-            }
-            placeholder="Example: Please separate items individually."
-          />
-        </section>
+        <div className="pm-warning">
+          Project Managers: Please send labels separately
+        </div>
 
         <button className="export-button" type="button" onClick={handleExport}>
           Export PDF
