@@ -52,7 +52,7 @@ function App() {
     const newItem = createItem({
       material: itemMaterial,
       name: itemName.trim(),
-      quantity: itemQuantity,
+      qty: itemQuantity,
     });
 
     // Use setSpec to update pallet specs so that newly created item gets added to its list

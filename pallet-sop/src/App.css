@@ -1,0 +1,177 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f5f7;
+  color: #222;
+}
+
+.app-shell {
+  min-height: 100vh;
+  padding: 32px 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.form-card {
+  width: 100%;
+  max-width: 850px;
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.page-header {
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.page-header p {
+  margin: 8px 0 0;
+  color: #666;
+}
+
+.form-section {
+  margin-bottom: 28px;
+}
+
+.form-section h2 {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+
+label {
+  font-weight: 600;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-header span {
+  color: #666;
+  font-size: 14px;
+}
+
+.item-entry-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 90px 120px;
+  gap: 10px;
+  align-items: end;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.item-entry-row button,
+.export-button {
+  background: #222;
+  color: white;
+}
+
+.item-list {
+  margin-top: 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.item-row:last-child {
+  border-bottom: none;
+}
+
+.item-row button {
+  background: #eee;
+  color: #222;
+}
+
+.empty-message {
+  margin: 0;
+  padding: 14px;
+  color: #777;
+}
+
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.check-option,
+.radio-stack label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.check-option input,
+.radio-stack input {
+  width: auto;
+  margin: 0;
+}
+
+.radio-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.export-button {
+  width: 100%;
+  font-size: 16px;
+  padding: 14px;
+}
+
+@media (max-width: 700px) {
+  .item-entry-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-card {
+    padding: 20px;
+  }
+}
