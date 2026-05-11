@@ -6,6 +6,7 @@ import {
   packagingOptions,
   crateTypeOptions,
 } from "./data/buildOptions";
+import { generatePackingInstructions } from "./utils/generatePackingInstructions";
 import "./App.css";
 
 function App() {
@@ -79,8 +80,8 @@ function App() {
 
   // Handler function to export pallet specs to pdf handler
   function handleExport() {
-    console.log("Exporting spec:", spec);
-    // Later: call generatePdf(spec)
+    const instructions = generatePackingInstructions(spec);
+    console.log(instructions);
   }
 
   // Component builder
