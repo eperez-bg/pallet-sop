@@ -6,7 +6,7 @@ import {
   packagingOptions,
   crateTypeOptions,
 } from "./data/buildOptions";
-import { generatePackingInstructions } from "./utils/generatePackingInstructions";
+import { downloadPalletSpecPdf } from "./utils/generatePalletSpecPdf";
 import "./App.css";
 
 function App() {
@@ -79,9 +79,23 @@ function App() {
 
 
   // Handler function to export pallet specs to pdf handler
-  function handleExport() {
-    const instructions = generatePackingInstructions(spec);
-    console.log(instructions);
+  async function handleExport() { 
+    if (!spec.clientName.trim()) {
+      alert("Please enter a client or project name before exporting.");
+      return;
+    }
+
+    if (spec.items.length === 0) {
+      alert("Please add at least one item before exporting.");
+      return;
+    }
+
+    try {
+      await downloadPalletSpecPdf(spec);
+    } catch (error) {
+      console.error("PDF export failed:", error);
+      alert("PDF export failed. Check the console for details.");
+    }
   }
 
   // Component builder
