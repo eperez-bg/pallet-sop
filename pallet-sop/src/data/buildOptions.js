@@ -19,5 +19,5 @@ export const packagingOptions = [
 export const crateTypeOptions = [
     'Fully Crated',
     'Open Style Crate',
-    'Pallet Only',
+    'Halo Crate',
 ];

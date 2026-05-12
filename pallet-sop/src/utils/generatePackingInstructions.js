@@ -226,11 +226,11 @@ export function generatePackingInstructions(spec) {
     );
   }
 
-  // If pallet only selected and has fragile item, include instruction that item is protected
-  if (spec.crateType === "Pallet Only" && hasFragileMaterial) {
+  // If halo crate selected and has fragile item, include instruction that item is protected
+  if (spec.crateType === "Halo Crate" && hasFragileMaterial) {
     addInstruction(
       instructions,
-      "Warning: Pallet only selected with fragile or sensitive items. Confirm that items are protected from impact and cannot shift. Bubble wrap alone is not acceptable."
+      "Halo crate selected with fragile or sensitive items. Items must be secured with blocking, bracing, padding, and edge protection so they cannot shift, rub, or contact the crate frame."
     );
   }
 

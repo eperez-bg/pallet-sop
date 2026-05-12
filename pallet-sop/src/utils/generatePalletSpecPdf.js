@@ -10,8 +10,8 @@ const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;
 // Object to store image information for each pallet style
 const crateTypeImages = {
   "Fully Crated": {
-    fileName: "fully-crated.png",
-    type: "png",
+    fileName: "fully-crated.jpg",
+    type: "jpg",
     label: "Fully Crated",
   },
   "Open Style Crate": {
@@ -19,10 +19,10 @@ const crateTypeImages = {
     type: "jpg",
     label: "Open Style Crate",
   },
-  "Pallet Only": {
-    fileName: "pallet-only.jpg",
+  "Halo Crate": {
+    fileName: "halo-crate.jpg",
     type: "jpg",
-    label: "Pallet Only",
+    label: "Halo Crate",
   },
 };
 
@@ -408,6 +408,8 @@ export async function downloadPalletSpecPdf(spec) {
   drawSectionTitle("Client / Project");
   drawKeyValue("Client / Project Name", spec.clientName);
 
+  y -= 20;
+
   // Items
   drawSectionTitle("Items Being Stored");
 
@@ -423,6 +425,8 @@ export async function downloadPalletSpecPdf(spec) {
     });
   }
 
+  y -= 20;
+
   // Construction
   drawSectionTitle("Construction Specs");
 
@@ -433,6 +437,8 @@ export async function downloadPalletSpecPdf(spec) {
       drawBullet(option);
     });
   }
+
+  y -= 20;
 
   // Outer Packaging
   drawSectionTitle("Outer Packaging");
@@ -445,9 +451,13 @@ export async function downloadPalletSpecPdf(spec) {
     });
   }
 
+  y -= 20;
+
   // Crate Type
   drawSectionTitle("Crate Type");
   drawKeyValue("Selected Crate Type", spec.crateType);
+
+  y -= 20;
 
   // Generated Instructions
   drawSectionTitle("Generated Packing Instructions");
@@ -455,6 +465,8 @@ export async function downloadPalletSpecPdf(spec) {
   instructions.forEach((instruction) => {
     drawBullet(instruction);
   });
+
+  y -= 20;
 
   // PM warning
   drawWarningBox("PROJECT MANAGERS: PLEASE SEND LABELS SEPARATELY");
