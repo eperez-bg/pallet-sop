@@ -16,7 +16,6 @@ function App() {
   // States used to store item item specs
   const [itemMaterial, setItemMaterial] = useState("");
   const [itemName, setItemName] = useState("");
-  const [itemQuantity, setItemQuantity] = useState(1);
 
 
   // Updates pallet spec with updated value depending on field
@@ -45,7 +44,7 @@ function App() {
     event.preventDefault();
 
     // If no item material is given, no name is given, or quantity is less than 1, just return
-    if (!itemMaterial || !itemName.trim() || itemQuantity < 1) {
+    if (!itemMaterial || !itemName.trim()) {
       return;
     }
 
@@ -53,7 +52,6 @@ function App() {
     const newItem = createItem({
       material: itemMaterial,
       name: itemName.trim(),
-      qty: itemQuantity,
     });
 
     // Use setSpec to update pallet specs so that newly created item gets added to its list
@@ -65,7 +63,6 @@ function App() {
     // Set item spec state fields back to empty
     setItemMaterial("");
     setItemName("");
-    setItemQuantity(1);
   }
 
 
@@ -142,13 +139,6 @@ function App() {
               placeholder="Item name, ex: mirror, shelf"
             />
 
-            <input
-              type="number"
-              min="1"
-              value={itemQuantity}
-              onChange={(event) => setItemQuantity(event.target.value)}
-            />
-
             <button type="submit">Add Item</button>
           </form>
 
@@ -159,8 +149,7 @@ function App() {
               spec.items.map((item) => (
                 <div className="item-row" key={item.id}>
                   <span>
-                    <strong>{item.quantity}x</strong> {item.material}{" "}
-                    {item.name}
+                    {item.material} {item.name}
                   </span>
 
                   <button type="button" onClick={() => removeItem(item.id)}>

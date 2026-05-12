@@ -393,9 +393,7 @@ export async function downloadPalletSpecPdf(spec) {
     });
   } else {
     spec.items.forEach((item, index) => {
-      drawBullet(
-        `${index + 1}. ${item.quantity}x ${item.material} ${item.name}`
-      );
+      drawBullet(`${index + 1}. ${item.material} ${item.name}`);
     });
   }
 

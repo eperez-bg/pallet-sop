@@ -83,7 +83,7 @@ textarea {
 
 .item-entry-row {
   display: grid;
-  grid-template-columns: 160px 1fr 90px 120px;
+  grid-template-columns: 180px 1fr 120px;
   gap: 10px;
   align-items: end;
 }

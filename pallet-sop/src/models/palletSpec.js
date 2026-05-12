@@ -23,11 +23,10 @@ export function createEmptyPalletSpec() {
 }
 
 /// Creates and returns an object that represents an item being stored inside of the pallet
-export function createItem({ material, name, qty }) {
+export function createItem({ material, name }) {
     return {
         id: crypto.randomUUID(),
         material,
         name,
-        quantity: Number(qty),
     };
 }

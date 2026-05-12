@@ -50,10 +50,6 @@ export function generatePackingInstructions(spec) {
   const items = spec.items || [];
   const materials = getMaterials(items);
 
-  const totalQuantity = items.reduce((sum, item) => {
-    return sum + (Number(item.quantity) || 0);
-  }, 0);
-
   const uniqueMaterials = [...new Set(materials)];
 
   const fragileMaterials = ["Glass", "Acrylic", "Electronics"];
@@ -96,23 +92,12 @@ export function generatePackingInstructions(spec) {
     "General Packing Requirement: All items must be secured so they cannot shift, slide, rattle, rub, or make direct contact with other items during handling. Bubble wrap alone is not acceptable if the item can still move."
   );
 
-  if (items.length > 1 || totalQuantity > 1) {
+  if (items.length > 1) {
     addInstruction(
       instructions,
       "Multiple items are included. Each item must be wrapped separately and separated with foam, cardboard, dividers, or blocking. Items should not touch or rub against each other."
     );
   }
-
-  items.forEach((item) => {
-    const quantity = Number(item.quantity) || 0;
-
-    if (quantity > 1) {
-      addInstruction(
-        instructions,
-        `${quantity}x ${item.material} ${item.name}: Pack each unit separately or use separators between each unit. Do not stack pieces directly against each other without padding.`
-      );
-    }
-  });
 
   if (uniqueMaterials.length > 1) {
     addInstruction(
