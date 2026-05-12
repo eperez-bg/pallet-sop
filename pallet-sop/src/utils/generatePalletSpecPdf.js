@@ -1,11 +1,13 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { generatePackingInstructions } from "./generatePackingInstructions";
 
+// PDF size specs
 const PAGE_WIDTH = 612;
 const PAGE_HEIGHT = 792;
 const MARGIN = 50;
 const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;
 
+// Object to store image information for each pallet style
 const crateTypeImages = {
   "Fully Crated": {
     fileName: "fully-crated.png",
@@ -24,6 +26,7 @@ const crateTypeImages = {
   },
 };
 
+// Function to embed image into provided pdfDoc depending on provided crateType
 async function getCrateTypeImage(pdfDoc, crateType) {
   const imageInfo = crateTypeImages[crateType];
 
@@ -56,6 +59,7 @@ async function getCrateTypeImage(pdfDoc, crateType) {
   }
 }
 
+// Labels for construction options
 const constructionLabels = {
   nails: "Nails",
   screws: "Screws",
@@ -63,6 +67,7 @@ const constructionLabels = {
   glue: "Glue",
 };
 
+// Labels for packaging options
 const packagingLabels = {
   shrinkWrap: "Shrink Wrap",
   straps: "Straps",
@@ -70,6 +75,7 @@ const packagingLabels = {
   foamPadding: "Foam Padding",
 };
 
+// Sanitizes text so it prints appropriately on PDF
 function sanitizePdfText(value) {
   return String(value ?? "")
     .replace(/[“”]/g, '"')
@@ -78,12 +84,14 @@ function sanitizePdfText(value) {
     .replace(/[^\x20-\x7E]/g, "");
 }
 
+// Returns list of selected labels given list
 function getSelectedLabels(optionState = {}, labelMap = {}) {
   return Object.entries(optionState)
     .filter(([_, isSelected]) => isSelected)
     .map(([key]) => labelMap[key] || key);
 }
 
+// Function to return file name for PDF
 function formatFileName(value) {
   const safeName = String(value || "crate-spec")
     .trim()
@@ -93,6 +101,7 @@ function formatFileName(value) {
   return safeName || "crate-spec";
 }
 
+// Function to return list of lines of text, takes text parameter and for each word, if adding it to a line exceeds the maxWidth, add it to a new line
 function wrapText(text, font, fontSize, maxWidth) {
   const cleanText = sanitizePdfText(text);
   const words = cleanText.split(/\s+/).filter(Boolean);
@@ -124,6 +133,7 @@ function wrapText(text, font, fontSize, maxWidth) {
   return lines;
 }
 
+// Function that takes raw PDF file bytes and file name, then creates blob using bytes and type application/pdf, creates URL to blob object, creates anchor element and adds to DOM that points to blob URL, clicks it, then removes anchor
 function downloadPdf(pdfBytes, fileName) {
   const blob = new Blob([pdfBytes], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
@@ -141,26 +151,33 @@ function downloadPdf(pdfBytes, fileName) {
   }, 1000);
 }
 
+// Function to download PDF using pallet spec
 export async function downloadPalletSpecPdf(spec) {
+  // instance of PDFDocument object
   const pdfDoc = await PDFDocument.create();
 
+  // Fonts to be used in PDF
   const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
+  // Size of each page in PDF
   let page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
   let y = PAGE_HEIGHT - MARGIN;
 
+  /// Function to add new page to PDF
   function addNewPage() {
     page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
     y = PAGE_HEIGHT - MARGIN;
   }
 
+  /// Function that adds new page if provided requiredSpace doesn't fit in current page
   function ensureSpace(requiredSpace) {
     if (y - requiredSpace < MARGIN) {
       addNewPage();
     }
   }
 
+  /// Function to draw line of text on PDF with given options
   function drawLine(text, options = {}) {
     const {
       x = MARGIN,
@@ -183,6 +200,7 @@ export async function downloadPalletSpecPdf(spec) {
     y -= lineHeight;
   }
 
+  /// Function to draw wrapped text which allows text to flow to next page
   function drawWrappedText(text, options = {}) {
     const {
       x = MARGIN,
@@ -210,6 +228,7 @@ export async function downloadPalletSpecPdf(spec) {
     });
   }
 
+  /// Function to draw section title onto PDF 
   function drawSectionTitle(title) {
     y -= 8;
     ensureSpace(30);
@@ -234,6 +253,7 @@ export async function downloadPalletSpecPdf(spec) {
     y -= 16;
   }
 
+  /// Function to draw label: value
   function drawKeyValue(label, value) {
     drawWrappedText(`${label}: ${value || "Not selected"}`, {
       size: 11,
@@ -241,6 +261,7 @@ export async function downloadPalletSpecPdf(spec) {
     });
   }
 
+  /// Function to draw bullet before line if it is the first
   function drawBullet(text) {
     const lines = wrapText(text, regularFont, 10.5, CONTENT_WIDTH - 18);
 
@@ -261,57 +282,59 @@ export async function downloadPalletSpecPdf(spec) {
     });
   }
 
+  /// Function to draw crate type onto PDF
   async function drawCrateTypeImage() {
-  const crateImageData = await getCrateTypeImage(pdfDoc, spec.crateType);
+    const crateImageData = await getCrateTypeImage(pdfDoc, spec.crateType);
 
-  if (!crateImageData) {
-    return;
+    if (!crateImageData) {
+      return;
+    }
+
+    const { image, label } = crateImageData;
+
+    const maxImageWidth = 220;
+    const maxImageHeight = 150;
+
+    const scaled = image.scale(1);
+
+    const widthRatio = maxImageWidth / scaled.width;
+    const heightRatio = maxImageHeight / scaled.height;
+    const scaleFactor = Math.min(widthRatio, heightRatio);
+
+    const imageWidth = scaled.width * scaleFactor;
+    const imageHeight = scaled.height * scaleFactor;
+
+    ensureSpace(imageHeight + 50);
+
+    page.drawText("Selected Crate Type", {
+      x: MARGIN,
+      y,
+      size: 14,
+      font: boldFont,
+      color: rgb(0, 0, 0),
+    });
+
+    y -= 22;
+
+    page.drawImage(image, {
+      x: MARGIN,
+      y: y - imageHeight,
+      width: imageWidth,
+      height: imageHeight,
+    });
+
+    page.drawText(label, {
+      x: MARGIN + imageWidth + 24,
+      y: y - 24,
+      size: 18,
+      font: boldFont,
+      color: rgb(0, 0, 0),
+    });
+
+    y -= imageHeight + 24;
   }
 
-  const { image, label } = crateImageData;
-
-  const maxImageWidth = 220;
-  const maxImageHeight = 150;
-
-  const scaled = image.scale(1);
-
-  const widthRatio = maxImageWidth / scaled.width;
-  const heightRatio = maxImageHeight / scaled.height;
-  const scaleFactor = Math.min(widthRatio, heightRatio);
-
-  const imageWidth = scaled.width * scaleFactor;
-  const imageHeight = scaled.height * scaleFactor;
-
-  ensureSpace(imageHeight + 50);
-
-  page.drawText("Selected Crate Type", {
-    x: MARGIN,
-    y,
-    size: 14,
-    font: boldFont,
-    color: rgb(0, 0, 0),
-  });
-
-  y -= 22;
-
-  page.drawImage(image, {
-    x: MARGIN,
-    y: y - imageHeight,
-    width: imageWidth,
-    height: imageHeight,
-  });
-
-  page.drawText(label, {
-    x: MARGIN + imageWidth + 24,
-    y: y - 24,
-    size: 18,
-    font: boldFont,
-    color: rgb(0, 0, 0),
-  });
-
-  y -= imageHeight + 24;
-}
-
+  /// Function to draw warning box about label at bottom of PDF
   function drawWarningBox(text) {
     const boxHeight = 52;
 
@@ -346,11 +369,13 @@ export async function downloadPalletSpecPdf(spec) {
     y -= boxHeight + 8;
   }
 
+  // Stores which construction is currently being used
   const selectedConstruction = getSelectedLabels(
     spec.construction,
     constructionLabels
   );
 
+  // Stores which packaging is currently being used
   const selectedPackaging = getSelectedLabels(
     spec.outerPackaging,
     packagingLabels
@@ -386,6 +411,7 @@ export async function downloadPalletSpecPdf(spec) {
   // Items
   drawSectionTitle("Items Being Stored");
 
+  // Prints item list
   if (!spec.items || spec.items.length === 0) {
     drawLine("No items entered.", {
       size: 11,
