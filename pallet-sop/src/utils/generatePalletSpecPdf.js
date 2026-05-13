@@ -1,5 +1,7 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { generatePackingInstructions } from "./generatePackingInstructions";
+import fontkit from "@pdf-lib/fontkit";
+import { generateChinesePackingInstructions } from "./generateChinesePackingInstructions";
 
 // PDF size specs
 const PAGE_WIDTH = 612;
@@ -155,10 +157,19 @@ function downloadPdf(pdfBytes, fileName) {
 export async function downloadPalletSpecPdf(spec) {
   // instance of PDFDocument object
   const pdfDoc = await PDFDocument.create();
+  pdfDoc.registerFontkit(fontkit);
 
   // Fonts to be used in PDF
   const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  const chineseFontBytes = await fetch(
+    `${import.meta.env.BASE_URL}fonts/NotoSansSC-Regular.ttf`
+  ).then((response) => response.arrayBuffer());
+
+  const chineseFont = await pdfDoc.embedFont(chineseFontBytes, {
+    subset: false,
+  });
 
   // Size of each page in PDF
   let page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
@@ -175,6 +186,55 @@ export async function downloadPalletSpecPdf(spec) {
     if (y - requiredSpace < MARGIN) {
       addNewPage();
     }
+  }
+
+  function wrapChineseText(text, font, fontSize, maxWidth) {
+    const cleanText = String(text ?? "");
+    const characters = [...cleanText];
+
+    const lines = [];
+    let currentLine = "";
+
+    characters.forEach((character) => {
+      const testLine = currentLine + character;
+      const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+
+      if (testWidth <= maxWidth) {
+        currentLine = testLine;
+      } else {
+        if (currentLine) {
+          lines.push(currentLine);
+        }
+
+        currentLine = character;
+      }
+    });
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+
+    return lines;
+  }
+
+  function drawChineseBullet(text) {
+    const lines = wrapChineseText(text, chineseFont, 10.5, CONTENT_WIDTH - 18);
+
+    lines.forEach((line, index) => {
+      ensureSpace(16);
+
+      const prefix = index === 0 ? "• " : "  ";
+
+      page.drawText(`${prefix}${line}`, {
+        x: MARGIN + 10,
+        y,
+        size: 10.5,
+        font: chineseFont,
+        color: rgb(0, 0, 0),
+      });
+
+      y -= 16;
+    });
   }
 
   /// Function to draw line of text on PDF with given options
@@ -383,6 +443,11 @@ export async function downloadPalletSpecPdf(spec) {
 
   const instructions = generatePackingInstructions(spec);
 
+  const chineseInstructions = generateChinesePackingInstructions(
+    spec,
+    instructions
+  );
+
   // Header
   drawLine("Pallet / Crate SOP", {
     size: 24,
@@ -464,6 +529,14 @@ export async function downloadPalletSpecPdf(spec) {
 
   instructions.forEach((instruction) => {
     drawBullet(instruction);
+  });
+
+  y -= 20;
+
+  drawSectionTitle("中文包装说明");
+
+  chineseInstructions.forEach((instruction) => {
+    drawChineseBullet(instruction);
   });
 
   y -= 20;
