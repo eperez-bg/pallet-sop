@@ -157,16 +157,19 @@ function downloadPdf(pdfBytes, fileName) {
 export async function downloadPalletSpecPdf(spec) {
   // instance of PDFDocument object
   const pdfDoc = await PDFDocument.create();
+  // Registers fontkit instance
   pdfDoc.registerFontkit(fontkit);
 
   // Fonts to be used in PDF
   const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
+  // Fetches chinese font from public/fonts
   const chineseFontBytes = await fetch(
     `${import.meta.env.BASE_URL}fonts/NotoSansSC-Regular.ttf`
   ).then((response) => response.arrayBuffer());
 
+  // embeds chinese font into PDF doc instance
   const chineseFont = await pdfDoc.embedFont(chineseFontBytes, {
     subset: false,
   });
@@ -188,6 +191,7 @@ export async function downloadPalletSpecPdf(spec) {
     }
   }
 
+  // Function that returns list of lines of chinese text that fit inside the maxWidth of a page
   function wrapChineseText(text, font, fontSize, maxWidth) {
     const cleanText = String(text ?? "");
     const characters = [...cleanText];
@@ -217,6 +221,7 @@ export async function downloadPalletSpecPdf(spec) {
     return lines;
   }
 
+  // Function that draws bullet list item given text by first turning them into list of lines using wrapChineseText function
   function drawChineseBullet(text) {
     const lines = wrapChineseText(text, chineseFont, 10.5, CONTENT_WIDTH - 18);
 
@@ -533,8 +538,7 @@ export async function downloadPalletSpecPdf(spec) {
 
   y -= 20;
 
-  drawSectionTitle("中文包装说明");
-
+  // Generated Chinese Instructions
   chineseInstructions.forEach((instruction) => {
     drawChineseBullet(instruction);
   });
